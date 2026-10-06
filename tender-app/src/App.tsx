@@ -41,6 +41,8 @@ export const App = () => {
         resetProject={resetProject}
         isMobileOpen={isMobileOpen}
         setMobileOpen={setMobileOpen}
+        checklist={checklist}
+        documents={documents}
       />
 
       <main className="flex-1 min-w-0 flex flex-col relative">
@@ -52,12 +54,12 @@ export const App = () => {
             </div>
             <span className="text-sm font-semibold text-gray-200">Builder</span>
           </div>
-          <button onClick={() => setMobileOpen(true)} className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
+          <button aria-label="Open menu" onClick={() => setMobileOpen(true)} className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
             <Menu className="w-5 h-5" />
           </button>
         </header>
 
-        <div className="flex-1 p-4 md:p-8 lg:p-12 max-w-[1040px] mx-auto w-full">
+        <div className="flex-1 p-4 md:p-8 lg:p-12 max-w-[920px] mx-auto w-full">
           {/* Top Error Toast */}
           {appError && (
             <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3 relative shadow-subtle animate-in fade-in slide-in-from-top-4 duration-200">
