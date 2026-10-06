@@ -1,4 +1,6 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+const fs = require('fs');
+
+const content = `import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { ChecklistItem, getPackageReadiness } from '../matching/selectors';
 import { TenderData } from '../types';
 import { format } from 'date-fns';
@@ -10,7 +12,7 @@ export interface GenerationResult {
 }
 
 export const getPackageFilename = (tenderId: string): string => {
-  return `${tenderId}_Package.pdf`;
+  return \`\${tenderId}_Package.pdf\`;
 };
 
 // Colors
@@ -73,7 +75,7 @@ export const generateTenderPackage = async (
     coverPage.drawLine({ start: { x: marginX, y }, end: { x: width - marginX, y }, thickness: 1, color: colors.lightGray });
     y -= 25;
 
-    const drawDetail = (label: string, value: string, colX: number, colY: number) => {
+    const drawDetail = (label, value, colX, colY) => {
       coverPage.drawText(label.toUpperCase(), { x: colX, y: colY, size: 8, font: font, color: colors.gray });
       coverPage.drawText(value, { x: colX, y: colY - 14, size: 11, font: boldFont, color: colors.charcoal });
     };
@@ -88,7 +90,7 @@ export const generateTenderPackage = async (
 
     // Save Y to draw summary later (after we know pages)
     const summaryY = y;
-    y -= 80;
+    y -= 60;
 
     // INCLUDED DOCUMENTS
     coverPage.drawText('INCLUDED DOCUMENTS', { x: marginX, y, size: 10, font: boldFont, color: colors.gray });
@@ -103,6 +105,7 @@ export const generateTenderPackage = async (
       
       // Check if we need a new page for cover docs
       if (y < 120) {
+        // Just break to prevent overflow, unlikely with <10 docs but safety first
         break;
       }
 
@@ -130,16 +133,16 @@ export const generateTenderPackage = async (
         sourcePdf = await PDFDocument.load(buffer, { ignoreEncryption: false });
       } catch (err: any) {
         if (err.message && err.message.toLowerCase().includes('encrypted')) {
-           return { pdfBytes: null, filename: '', error: `Cannot process encrypted/password-protected file: ${item.matchedDocument.filename}` };
+           return { pdfBytes: null, filename: '', error: \`Cannot process encrypted/password-protected file: \${item.matchedDocument.filename}\` };
         }
-        return { pdfBytes: null, filename: '', error: `Cannot load or parse file: ${item.matchedDocument.filename}` };
+        return { pdfBytes: null, filename: '', error: \`Cannot load or parse file: \${item.matchedDocument.filename}\` };
       }
 
       try {
         const copiedPages = await mergedPdf.copyPages(sourcePdf, sourcePdf.getPageIndices());
         copiedPages.forEach(page => mergedPdf.addPage(page));
       } catch (err) {
-        return { pdfBytes: null, filename: '', error: `Failed to merge pages from file: ${item.matchedDocument.filename}` };
+        return { pdfBytes: null, filename: '', error: \`Failed to merge pages from file: \${item.matchedDocument.filename}\` };
       }
     }
 
@@ -149,16 +152,16 @@ export const generateTenderPackage = async (
     // Fill SUMMARY
     coverPage.drawText('PACKAGE SUMMARY', { x: marginX, y: summaryY, size: 10, font: boldFont, color: colors.gray });
     coverPage.drawLine({ start: { x: marginX, y: summaryY - 10 }, end: { x: width - marginX, y: summaryY - 10 }, thickness: 1, color: colors.lightGray });
-    coverPage.drawText(`${includedItems.length} documents included`, { x: marginX, y: summaryY - 25, size: 10, font: font, color: colors.charcoal });
-    coverPage.drawText(`${totalPages - 1} source pages`, { x: marginX, y: summaryY - 40, size: 10, font: font, color: colors.charcoal });
-    coverPage.drawText(`${totalPages} total package pages`, { x: marginX, y: summaryY - 55, size: 10, font: boldFont, color: colors.navy });
+    coverPage.drawText(\`\${includedItems.length} documents included\`, { x: marginX, y: summaryY - 25, size: 10, font: font, color: colors.charcoal });
+    coverPage.drawText(\`\${totalPages - 1} source pages\`, { x: marginX, y: summaryY - 40, size: 10, font: font, color: colors.charcoal });
+    coverPage.drawText(\`\${totalPages} total package pages\`, { x: marginX, y: summaryY - 55, size: 10, font: boldFont, color: colors.navy });
 
     // Apply Footers to ALL pages
     for (let i = 0; i < totalPages; i++) {
       const page = mergedPdf.getPage(i);
       const { width: pWidth } = page.getSize();
       
-      const footerText = `${tenderData.tender.tender_id} | Page ${i + 1} of ${totalPages}`;
+      const footerText = \`\${tenderData.tender.tender_id} | Page \${i + 1} of \${totalPages}\`;
       const textWidth = font.widthOfTextAtSize(footerText, 9);
       
       const fy = 20;
@@ -189,6 +192,9 @@ export const generateTenderPackage = async (
       error: null
     };
   } catch (error: any) {
-    return { pdfBytes: null, filename: '', error: `Unexpected generation error: ${error.message}` };
+    return { pdfBytes: null, filename: '', error: \`Unexpected generation error: \${error.message}\` };
   }
 };
+`;
+
+fs.writeFileSync('src/core/pdf/generator.ts', content);
