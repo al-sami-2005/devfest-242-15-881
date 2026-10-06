@@ -27,10 +27,11 @@ export interface UploadedDocument {
   size: number;
   type: string;
   pageCount: number;
-  contentHash: string; // for duplicate detection
+  contentHash: string; // SHA-256 for duplicate detection
   isDuplicate: boolean;
   duplicateGroup?: string;
-  parsingError?: string;
+  status: 'processing' | 'success' | 'error';
+  error?: { code: string; message: string };
 }
 
 export type RequirementStatus = 'missing' | 'expiry-date-needed' | 'expired' | 'not-provided' | 'ok';
